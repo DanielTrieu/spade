@@ -36,20 +36,25 @@ class SellerAgent(Agent):
             if msg_recv.body:        
                 print("Message received with content:", msg_recv.body)
                 message = msg_recv.body
-                rasa_responses = await rasa_agent.handle_text(message)
-                # rasa_responses : [{'recipient_id': 'default', 'text': 'All done!'}, {'recipient_id': 'default', 'custom': {'product': 'carrot', 'quantity': '20', 'price': '35', 'self_made_product': 'True'}}]
-                print(rasa_responses)
-                for response in rasa_responses:
-                    for msg_type, msg_content in response.items():
-                        if msg_type == "text":
-                            sender = str(msg_recv.sender)
-                            msg_sent =Message(to=sender)
-                            msg_sent.body= msg_content
-                            await self.send(msg_sent)
-                        if msg_type =="custom":
-                            print (msg_content)
-                            self.set("sell_data",msg_content)
-                            await self.agent.run_selling_handler()
+                sender = str(msg_recv.sender)
+                print("senderid", sender)
+                rasa_responses = await rasa_agent.handle_text(message, sender_id=sender)
+                if rasa_responses:
+                    
+                    # rasa_responses : [{'recipient_id': 'default', 'text': 'All done!'}, {'recipient_id': 'default', 'custom': {'product': 'carrot', 'quantity': '20', 'price': '35', 'self_made_product': 'True'}}]
+                    print(rasa_responses)
+                    for response in rasa_responses:
+                        for msg_type, msg_content in response.items():
+                            if msg_type == "text":
+                                #sender = str(msg_recv.sender)
+                                msg_sent =Message(to=sender)
+                                msg_sent.body= msg_content
+                                await self.send(msg_sent)
+                            if msg_type =="custom":
+                                print (msg_content)
+                                self.set("sell_data",msg_content)
+                                await self.agent.run_selling_handler()
+
 
 
 
